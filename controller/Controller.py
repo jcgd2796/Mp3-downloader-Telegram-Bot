@@ -1,30 +1,34 @@
-import youtube_dl
+import yt_dlp
 import os
-
+import json
 
 class Controller:
-    ydl_opts = None
-
     def __init__(self):
         self.ydl_opts = {
-            'format': 'bestaudio/best',
-            'outtmpl': '../downloads/%(title)s.%(ext)s',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
+            'format': 'bestaudio',
+            'outtmpl': '',
+            'postprocessors': [
+                {
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                },
+                {
+                    'key': 'EmbedThumbnail',
+                },
+            ],
+            'writethumbnail': True,
         }
 
     def download(self, url: str):
-        with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
+        info = json.loads(json.dumps(yt_dlp.YoutubeDL({'quiet':True}).sanitize_info(yt_dlp.YoutubeDL({'quiet':True}).extract_info(url, download=False))))
+        self.ydl_opts['outtmpl'] = os.path.join(os.path.dirname(__file__), '..', 'downloads', info['title'])
+        with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
             ydl.cache.remove()
             ydl.download([url])
-            info = ydl.extract_info(url, download=False)
-            title = info['title']
-        title = title.replace("|", "_").replace(":", " -")
-        return title+".mp3"
+        return info['title']+'.mp3'
 
     def delete(self, file: str):
-        os.system('rm -rf ../downloads/\"'+file+"\"")
+        file_path = os.path.join(os.path.dirname(__file__),'..','downloads', file)
+        if os.path.exists(file_path):
+            os.remove(file_path)
         return

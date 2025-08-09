@@ -17,6 +17,7 @@ class Controller:
                 },
             ],
             'writethumbnail': True,
+            'quiet':True,
         }
 
     def download(self, url: str):

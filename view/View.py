@@ -4,12 +4,13 @@ Author:
     Jcgd2796"""
 import os
 import telegram.error
+import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes
 from telegram.ext import filters
 from controller.Controller import Controller
 
-
+logger = logging.getLogger('MP3Downloader')
 class View:
     def __init__(self, c: Controller, t: str):
         self.controller = c
@@ -60,7 +61,7 @@ class View:
             await update.message.reply_text("File is too large. Can't send files over 50 MB")
         except Exception as ex:
             await update.message.reply_text("An error has occurred, please tell my owner")
-            print(ex)
+            logger.exception(traceback.format_exc())
             return
         finally:
             if (file != None):
